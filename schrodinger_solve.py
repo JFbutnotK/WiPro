@@ -14,16 +14,18 @@ xPot = [-2.0, -0.5, -0.5, 0.5, 0.5, 2.0]
 yPot = [0.0, 0.0, -10.0, -10.0, 0.0, 0.0]
 deg = len(xPot)-1
 firstEV = 0
-lastEV = 15
+lastEV = 2
 
 
 def abkurzung():
     gitter = np.linspace(xMin, xMax, nPoint)
     delta = np.abs( gitter[1] - gitter[0] )
     a = 1 / ( m * delta ** 2 )
-    return a, gitter
+    return a, gitter, delta
 
-a, gitter = abkurzung()
+a, gitter, delta = abkurzung()
+
+
 
 def PotentialInterpolation():
     if interp_type == 'linear':
@@ -44,9 +46,34 @@ def PotentialInterpolation():
 
 Potential = PotentialInterpolation()
 
-NebenDiagonale = [- 1 / 2 * a] * ( nPoint - 1 )
-HauptDiagonale = a + Potential
 
-eigVal, eigVec = sp.linalg.eigh_tridiagonal(HauptDiagonale, NebenDiagonale, select = 'i', select_range = (firstEV, lastEV))
 
-print(eigVal)
+def SchrodingerEq():
+    NebenDiagonale = [- 1 / 2 * a] * ( nPoint - 1 )
+    HauptDiagonale = a + Potential
+    eigVal, eigVec = sp.linalg.eigh_tridiagonal(HauptDiagonale, NebenDiagonale, select = 'i', select_range = (firstEV, lastEV))
+    for i in range(len(eigVal)):
+        eigVec[:, i] /= np.sqrt( delta * np.sum( np.abs( eigVec[:, i] ) ** 2 ) )
+    return eigVal, eigVec
+
+eigVal, eigVec = SchrodingerEq()
+
+
+
+with open('potential.dat', "w") as potentialdat:
+    for i in range(nPoint):
+        text = f'{gitter[i]} \t {Potential[i]} \n'
+        potentialdat.write(text)
+
+with open('energies.dat', "w") as energiesdat:
+    for i in range(len(eigVal)):
+        text = f'{eigVal[i]} \n'
+        energiesdat.write(text)
+
+with open('wavefuncs.dat', "w") as wavefuncsdat:
+    for i in range(nPoint):
+        text = f'{gitter[i]} \t'
+        for ii in range(len(eigVal)):
+            text += f'{eigVec[i][ii]} \t'
+        text += f'\n'
+        wavefuncsdat.write(text)
