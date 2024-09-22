@@ -1,20 +1,59 @@
 import numpy as np
 import scipy as sp
-import matplotlib as plt
-#import pytest 
-#solving the Schroedinger equation
 
 
-m = 2.0
-xMin = -2.0
-xMax = 2.0
-nPoint = 1999
-interp_type = 'linear'
-xPot = [-2.0, -0.5, -0.5, 0.5, 0.5, 2.0]
-yPot = [0.0, 0.0, -10.0, -10.0, 0.0, 0.0]
-deg = len(xPot)-1
-firstEV = 0
-lastEV = 2
+def import_input(directory="./"):
+    """
+    Returns lines from schrodinger.inp.
+    
+    :param directory: Optional parameter to set if input file is not located in root directory.
+
+    :return: List with fit parameters.
+    """
+    raw_input_data = []
+    try:
+        input_file = open(directory + "schrodinger.inp", "r")
+        
+    except FileNotFoundError:
+        print("Could not open {}".format(directory + "schrodinger.inp")) 
+
+    else:
+        for line in input_file:
+            line = line.split("\t")[0]
+            line = line.split("\n")[0]
+            raw_input_data.append(line)   
+        input_file.close()
+    return raw_input_data
+
+def save_variables(raw_input_data):
+    """
+    Seperates List into variables.
+
+    :param raw_input_data: Parameter from which to take the variables.
+
+    :return: Variables
+    """
+    m = float(raw_input_data[0])
+    line2 = raw_input_data[1].split(" ")
+    xMin = float(line2[0])
+    xMax = float(line2[1])
+    nPoint = int(line2[2])
+    line3 = raw_input_data[2].split(" ")
+    firstEV = int(line3[0])
+    lastEV = int(line3[1])
+    interp_type = raw_input_data[3]
+    num_interp_points = int(raw_input_data[4])
+    potential_points = []
+    for i in range(5, 5+num_interp_points):
+        potential_points.append(raw_input_data[i].split(" "))
+        potential_points[i-5][0] = float(potential_points[i-5][0])
+        potential_points[i-5][1] = float(potential_points[i-5][1])
+
+    return m, xMin, xMax, nPoint, firstEV, lastEV, interp_type, num_interp_points, potential_points
+
+raw_input_data = import_input("./")
+m, xMin, xMax, nPoint, firstEV, lastEV, interp_type, num_interp_points, potential_points = save_variables(raw_input_data)
+
 
 
 def abkurzung():
