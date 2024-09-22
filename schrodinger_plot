@@ -1,0 +1,82 @@
+import numpy as np
+import scipy as sp
+import matplotlib.pyplot as plt
+
+directory = "./"
+
+
+
+
+
+
+raw_potential_data = []
+try:
+    potential_file = open(directory + "potential.dat", "r")
+        
+except FileNotFoundError:
+    print("Could not open {}".format(directory + "potential.dat")) 
+
+else:
+    for line in potential_file:
+        line = line.split("\n")[0]
+        raw_potential_data.append(line)   
+    potential_file.close()
+
+potential = []
+
+for i in range(len(raw_potential_data)):
+    line = raw_potential_data[i].split(" ")
+    potential.append(float(line[1]))
+
+
+
+energies = []
+try:
+    energies_file = open(directory + "energies.dat", "r")
+
+except FileNotFoundError:
+    print("Could not open {}".format(directory + "energies.dat")) 
+
+else:
+    for line in energies_file:
+        line = line.split("\n")[0]
+        energies.append(float(line))   
+    energies_file.close()
+
+
+
+raw_wavefunc_data = []
+try:
+    wavefuncs_file = open(directory + "wavefuncs.dat", "r")
+        
+except FileNotFoundError:
+    print("Could not open {}".format(directory + "wavefuncs.dat")) 
+
+else:
+    for line in wavefuncs_file:
+        line = line.split("\n")[0]
+        raw_wavefunc_data.append(line)   
+    wavefuncs_file.close()
+
+x = []
+wavefuncs = np.empty((len(energies), len(potential)))
+
+for i in range(len(raw_wavefunc_data)):
+    line = raw_wavefunc_data[i].split(" ")
+    x.append(float(line[0]))
+
+    for ii in range(len(energies)):
+        wavefuncs[ii][i] = float(line[ii+1])
+
+
+
+
+plt.plot(x, potential, c='black') 
+plt.hlines(energies, 1.1*min(x), 1.1*max(x), colors='grey', linestyle='-')
+for i in range(len(wavefuncs)):
+    plt.plot(x, wavefuncs[i]+energies[i], c='red')
+plt.xlabel('x [Bohr]')
+plt.ylabel('Energy [Hartree]')
+plt.title('Potential, eigenstates, ⟨x⟩')
+plt.xlim(1.1*min(x), 1.1*max(x))
+plt.show()
