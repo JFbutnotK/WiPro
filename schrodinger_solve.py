@@ -27,7 +27,7 @@ def import_input(directory="./"):
 
 def save_variables(raw_input_data):
     """
-    Seperates List into variables.
+    Seperates list into variables.
 
     :param raw_input_data: Parameter from which to take the variables.
 
@@ -39,22 +39,24 @@ def save_variables(raw_input_data):
     xMax = float(line2[1])
     nPoint = int(line2[2])
     line3 = raw_input_data[2].split(" ")
-    firstEV = int(line3[0])
-    lastEV = int(line3[1])
+    firstEV = int(line3[0])-1
+    lastEV = int(line3[1])-1
     interp_type = raw_input_data[3]
     num_interp_points = int(raw_input_data[4])
     potential_points = []
+    xPot = []
+    yPot = []
     for i in range(5, 5+num_interp_points):
         potential_points.append(raw_input_data[i].split(" "))
-        potential_points[i-5][0] = float(potential_points[i-5][0])
-        potential_points[i-5][1] = float(potential_points[i-5][1])
+        xPot.append(float(potential_points[i-5][0]))
+        yPot.append(float(potential_points[i-5][1]))
+    deg = len(xPot)-1
 
-    return m, xMin, xMax, nPoint, firstEV, lastEV, interp_type, num_interp_points, potential_points
+    return m, xMin, xMax, nPoint, firstEV, lastEV, interp_type, num_interp_points, deg, xPot, yPot
 
 raw_input_data = import_input("./")
-m, xMin, xMax, nPoint, firstEV, lastEV, interp_type, num_interp_points, potential_points = save_variables(raw_input_data)
 
-
+m, xMin, xMax, nPoint, firstEV, lastEV, interp_type, num_interp_points, deg, xPot, yPot = save_variables(raw_input_data)
 
 def abkurzung():
     gitter = np.linspace(xMin, xMax, nPoint)
@@ -137,3 +139,4 @@ with open('expvalues.dat', "w") as expvaldat:
     for i in range(len(expvalue)):
         text = f'{expvalue[i]} {uncertainty[i]}\n'
         expvaldat.write(text)
+
