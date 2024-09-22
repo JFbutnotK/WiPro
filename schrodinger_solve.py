@@ -4,8 +4,10 @@ Modules used for linear algebra and interpolation.
 import numpy as np
 import scipy as sp
 
+directory_input = input('Please enter the directory from which the .dat files should be taken. \n'
+                  +'If the current directory is correct please enter \'.\'\n')
 
-def import_input(directory="./"):
+def import_input(directory):
     """
     Returns lines from schrodinger.inp.
     
@@ -15,18 +17,16 @@ def import_input(directory="./"):
     """
     raw_input_data = []
     try:
-        input_file = open(directory + "schrodinger.inp", "r", encoding="utf-8")
+        input_file = open(directory + "/schrodinger.inp", "r", encoding="utf-8")
 
-    except FileNotFoundError:
-        print("blob")
-        #Überarbeitung
+    except FileNotFoundError as exc:
+        raise ValueError("schrodinger.inp could not be found in this directory.") from exc
 
-    else:
-        for line in input_file:
-            line = line.split("\t")[0]
-            line = line.split("\n")[0]
-            raw_input_data.append(line)
-        input_file.close()
+    for line in input_file:
+        line = line.split("\t")[0]
+        line = line.split("\n")[0]
+        raw_input_data.append(line)
+    input_file.close()
     return raw_input_data
 
 def save_variables(raw_input_data):
@@ -50,15 +50,15 @@ def save_variables(raw_input_data):
     potential_points = []
     x_pot = []
     y_pot = []
-    for j in range(5, 5+num_interp_points):
+    for j in range(5, 5+num_int_points):
         potential_points.append(raw_input_data[j].split(" "))
-        xpot.append(float(potential_points[j-5][0]))
-        ypot.append(float(potential_points[j-5][1]))
-    degree = len(xpot)-1
+        x_pot.append(float(potential_points[j-5][0]))
+        y_pot.append(float(potential_points[j-5][1]))
+    degree = len(x_pot)-1
 
     return m, xmin, xmax, npoint, firstev, lastev, int_type, num_int_points, degree, x_pot, y_pot
 
-raw_data = import_input("./")
+raw_data = import_input(directory_input)
 
 mass, x_min, x_max, n_point, first_ev, last_ev, interp_type, num_interp_points, deg, xpot, ypot = save_variables(raw_data)
 
@@ -71,8 +71,8 @@ def abkurzung():
     :return: A factor using the mass and the distance, array with the lattice points, and the distance between neighbouring lattice points.
     """
     lattice = np.linspace(x_min, x_max, n_point)
-    deriv = np.abs( gitter[1] - gitter[0] )
-    abk = 1 / ( mass * delta ** 2 )
+    deriv = np.abs( lattice[1] - lattice[0] )
+    abk = 1 / ( mass * deriv ** 2 )
     return abk, lattice, deriv
 
 a, gitter, delta = abkurzung()
