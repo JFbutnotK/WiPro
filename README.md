@@ -6,10 +6,15 @@ The input sheet should have the the mass, the first and last x value of the latt
 The sheet should follow the format:
 
 mass
+
 first and last value for lattice and number of points
+
 first and last eigenvalue
+
 interpolation type
+
 number of interpolation points
+
 xy declarations for potential
 
 After successfully saving the data in 'schrodinger.inp' the code 'schrodinger_solve.py' may be run. Please ensure that the 'schrodinger.inp' file is in the same repository as the code 'schrodinger_solve.py'.
