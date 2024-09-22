@@ -62,7 +62,7 @@ eigVal, eigVec = SchrodingerEq()
 
 with open('potential.dat', "w") as potentialdat:
     for i in range(nPoint):
-        text = f'{gitter[i]} \t {Potential[i]} \n'
+        text = f'{gitter[i]}' f' {Potential[i]} \n'
         potentialdat.write(text)
 
 with open('energies.dat', "w") as energiesdat:
@@ -72,8 +72,29 @@ with open('energies.dat', "w") as energiesdat:
 
 with open('wavefuncs.dat', "w") as wavefuncsdat:
     for i in range(nPoint):
-        text = f'{gitter[i]} \t'
+        text = f'{gitter[i]} ' 
         for ii in range(len(eigVal)):
-            text += f'{eigVec[i][ii]} \t'
+            text += f'{eigVec[i][ii]} '
         text += f'\n'
         wavefuncsdat.write(text)
+
+
+
+def expval():
+    expvalue = []
+    expvalQuad = []
+    for i in range(len(eigVal)):
+        expvalue.append( delta * np.sum( eigVec[i, :] * gitter[i] * eigVec[i, :] ) )
+        #expvalue.append( ( expvalue[i] ** 2) )
+        expvalQuad.append( delta * np.sum( eigVec[i, :] * gitter[i] ** 2 * eigVec[i, :] ) )
+    expvalue = np.array(expvalue)
+    expvalQuad = np.array(expvalQuad)
+    uncertainty = ( np.sqrt( ( expvalQuad - expvalue ** 2 ) ) )
+    return uncertainty, expvalue, expvalQuad
+
+uncertainty, expvalue, expvalQuad = expval()
+
+with open('expvalues.dat', "w") as expvaldat:
+    for i in range(len(expvalue)):
+        text = f'{expvalue[i]} {uncertainty[i]}\n'
+        expvaldat.write(text)
