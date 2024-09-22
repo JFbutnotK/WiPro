@@ -1,0 +1,122 @@
+import numpy as np
+import scipy as sp
+import matplotlib.pyplot as plt
+
+directory = "./"
+
+
+raw_potential_data = []
+try:
+    potential_file = open(directory + "potential.dat", "r")
+except FileNotFoundError:
+    print("Could not open {}".format(directory + "potential.dat"))
+else:
+    for line in potential_file:
+        line = line.split("\n")[0]
+        raw_potential_data.append(line)
+    potential_file.close()
+
+potential = []
+
+for i in range(len(raw_potential_data)):
+    line = raw_potential_data[i].split(" ")
+    potential.append(float(line[1]))
+
+
+
+energies = []
+try:
+    energies_file = open(directory + "energies.dat", "r")
+
+except FileNotFoundError:
+    print("Could not open {}".format(directory + "energies.dat"))
+
+else:
+    for line in energies_file:
+        line = line.split("\n")[0]
+        energies.append(float(line))
+    energies_file.close()
+
+
+
+raw_wavefunc_data = []
+try:
+    wavefuncs_file = open(directory + "wavefuncs.dat", "r")
+        
+except FileNotFoundError:
+    print("Could not open {}".format(directory + "wavefuncs.dat"))
+
+else:
+    for line in wavefuncs_file:
+        line = line.split("\n")[0]
+        raw_wavefunc_data.append(line)
+    wavefuncs_file.close()
+
+x = []
+wavefuncs = np.empty((len(energies), len(potential)))
+
+for i in range(len(raw_wavefunc_data)):
+    line = raw_wavefunc_data[i].split(" ")
+    x.append(float(line[0]))
+
+    for ii in range(len(energies)):
+        wavefuncs[ii][i] = float(line[ii+1])
+
+
+raw_expvalues_data = []
+try:
+    expvalues_file = open(directory + "expvalues.dat", "r")
+        
+except FileNotFoundError:
+    print("Could not open {}".format(directory + "expvalues.dat"))
+
+else:
+    for line in expvalues_file:
+        line = line.split("\n")[0]
+        raw_expvalues_data.append(line)
+    expvalues_file.close()
+
+pos_exp_val = []
+uncert = []
+
+for i in range(len(energies)):
+    line = raw_expvalues_data[i].split(" ")
+    pos_exp_val.append(float(line[0]))
+    uncert.append(float(line[1]))
+
+
+
+
+def plot_results(display = 'show'):
+    plt.figure()
+    ax1 = plt.subplot(1, 2, 1)
+
+    colours = ['b', 'r']
+    plt.plot(x, potential, c='black')
+    plt.hlines(energies, 1.1*min(x), 1.1*max(x), colors='grey', linestyle='-')
+    for i in range(len(wavefuncs)):
+        plt.plot(x, wavefuncs[i]+energies[i], c=colours[i % len(colours)])
+    plt.scatter(pos_exp_val, energies, c='green', marker='x')
+    plt.xlabel('x [Bohr]')
+    plt.ylabel('Energy [Hartree]')
+    plt.title('Potential, eigenstates, ⟨x⟩')
+    plt.xlim(1.1*min(x), 1.1*max(x))
+
+    plt.subplot(1, 2, 2, sharey=ax1)
+    plt.hlines(energies, 0, 1.1*max(uncert), colors='grey', linestyle='-')
+    plt.scatter(uncert, energies,  c='violet', marker='+')
+    plt.xlabel('[Bohr]')
+    plt.title(r'$\sigma_x$')
+    plt.xlim(0, 1.1*max(uncert))
+
+    if display == 'show':
+        plt.show()
+    elif display == 'save':
+        plt.savefig('schrodinger_results.pdf', dpi=300)
+    else:
+        display = input('Please select \'show\' or \'save\' to select if the results are shown or saved.')
+
+plot_results('show')
+
+
+
