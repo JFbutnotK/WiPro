@@ -1,3 +1,6 @@
+"""
+Modules used for linear algebra and interpolation.
+#"""
 import numpy as np
 import scipy as sp
 
@@ -12,16 +15,17 @@ def import_input(directory="./"):
     """
     raw_input_data = []
     try:
-        input_file = open(directory + "schrodinger.inp", "r")
-        
+        input_file = open(directory + "schrodinger.inp", "r", encoding="utf-8")
+
     except FileNotFoundError:
-        print("Could not open {}".format(directory + "schrodinger.inp")) 
+        print("blob")
+        #Überarbeitung
 
     else:
         for line in input_file:
             line = line.split("\t")[0]
             line = line.split("\n")[0]
-            raw_input_data.append(line)   
+            raw_input_data.append(line)
         input_file.close()
     return raw_input_data
 
@@ -35,108 +39,134 @@ def save_variables(raw_input_data):
     """
     m = float(raw_input_data[0])
     line2 = raw_input_data[1].split(" ")
-    xMin = float(line2[0])
-    xMax = float(line2[1])
-    nPoint = int(line2[2])
+    xmin = float(line2[0])
+    xmax = float(line2[1])
+    npoint = int(line2[2])
     line3 = raw_input_data[2].split(" ")
-    firstEV = int(line3[0])-1
-    lastEV = int(line3[1])-1
-    interp_type = raw_input_data[3]
-    num_interp_points = int(raw_input_data[4])
+    firstev = int(line3[0])-1
+    lastev = int(line3[1])-1
+    int_type = raw_input_data[3]
+    num_int_points = int(raw_input_data[4])
     potential_points = []
-    xPot = []
-    yPot = []
-    for i in range(5, 5+num_interp_points):
-        potential_points.append(raw_input_data[i].split(" "))
-        xPot.append(float(potential_points[i-5][0]))
-        yPot.append(float(potential_points[i-5][1]))
-    deg = len(xPot)-1
+    x_pot = []
+    y_pot = []
+    for j in range(5, 5+num_interp_points):
+        potential_points.append(raw_input_data[j].split(" "))
+        xpot.append(float(potential_points[j-5][0]))
+        ypot.append(float(potential_points[j-5][1]))
+    degree = len(xpot)-1
 
-    return m, xMin, xMax, nPoint, firstEV, lastEV, interp_type, num_interp_points, deg, xPot, yPot
+    return m, xmin, xmax, npoint, firstev, lastev, int_type, num_int_points, degree, x_pot, y_pot
 
-raw_input_data = import_input("./")
+raw_data = import_input("./")
 
-m, xMin, xMax, nPoint, firstEV, lastEV, interp_type, num_interp_points, deg, xPot, yPot = save_variables(raw_input_data)
+mass, x_min, x_max, n_point, first_ev, last_ev, interp_type, num_interp_points, deg, xpot, ypot = save_variables(raw_data)
 
 def abkurzung():
-    gitter = np.linspace(xMin, xMax, nPoint)
-    delta = np.abs( gitter[1] - gitter[0] )
-    a = 1 / ( m * delta ** 2 )
-    return a, gitter, delta
+    """
+    Calculates the lattice points, the distance between neighbouring points.
+
+    :param :
+
+    :return: A factor using the mass and the distance, array with the lattice points, and the distance between neighbouring lattice points.
+    """
+    lattice = np.linspace(x_min, x_max, n_point)
+    deriv = np.abs( gitter[1] - gitter[0] )
+    abk = 1 / ( mass * delta ** 2 )
+    return abk, lattice, deriv
 
 a, gitter, delta = abkurzung()
 
 
 
-def PotentialInterpolation():
+def interpolation():
+    """
+    Interpolates the potential points given in schrodinger.inp.
+    
+    :param :
+
+    :return: Array with interpolated potential.
+    """
     if interp_type == 'linear':
-        Potential = np.interp(gitter, xPot, yPot)
+        potential = np.interp(gitter, xpot, ypot)
 
     elif interp_type == 'polynomial':
-        PolyFit = np.polyfit(xPot, yPot, deg)
-        Potential = np.polyval(PolyFit, gitter)
+        poly_fit = np.polyfit(xpot, ypot, deg)
+        potential = np.polyval(poly_fit, gitter)
 
     elif interp_type == 'cspline':
-        CSpline = sp.interpolate.CubicSpline(xPot, yPot)
-        Potential = CSpline(gitter)
+        c_spline = sp.interpolate.CubicSpline(xpot, ypot)
+        potential = c_spline(gitter)
 
     else:
         raise ValueError('The used interpolation type is not supported by this program. Supported types are: linear, polynomial, cspline.')
 
-    return(Potential)
+    return potential
 
-Potential = PotentialInterpolation()
-
-
-
-def SchrodingerEq():
-    NebenDiagonale = [- 1 / 2 * a] * ( nPoint - 1 )
-    HauptDiagonale = a + Potential
-    eigVal, eigVec = sp.linalg.eigh_tridiagonal(HauptDiagonale, NebenDiagonale, select = 'i', select_range = (firstEV, lastEV))
-    for i in range(len(eigVal)):
-        eigVec[:, i] /= np.sqrt( delta * np.sum( np.abs( eigVec[:, i] ) ** 2 ) )
-    return eigVal, eigVec
-
-eigVal, eigVec = SchrodingerEq()
+potenzial = interpolation()
 
 
 
-with open('potential.dat', "w") as potentialdat:
-    for i in range(nPoint):
-        text = f'{gitter[i]}' f' {Potential[i]} \n'
+def schrodinger_eq():
+    """
+    Calculates stationary Schroedinger equation for given paramaters as eigenvalue problem.
+    
+    :param :
+
+    :return: Arrays with eigenvalues and eigenvectors.
+    """
+    neben_diagonale = [- 1 / 2 * a] * ( n_point - 1 )
+    haupt_diagonale = a + potenzial
+    eigval, eigvec = sp.linalg.eigh_tridiagonal(haupt_diagonale, neben_diagonale, select = 'i', select_range = (first_ev, last_ev))
+    for h in range(len(eigval)):
+        eigvec[:, h] /= np.sqrt( delta * np.sum( np.abs( eigvec[:, h] ) ** 2 ) )
+    return eigval, eigvec
+
+eig_val, eig_vec = schrodinger_eq()
+
+
+
+with open('potential.dat', "w", encoding="utf-8") as potentialdat:
+    for f in range(n_point):
+        text = f'{gitter[f]}' f' {potenzial[f]} \n'
         potentialdat.write(text)
 
-with open('energies.dat', "w") as energiesdat:
-    for i in range(len(eigVal)):
-        text = f'{eigVal[i]} \n'
+with open('energies.dat', "w", encoding="utf-8") as energiesdat:
+    for p in range(len(eig_val)):
+        text = f'{eig_val[p]} \n'
         energiesdat.write(text)
 
-with open('wavefuncs.dat', "w") as wavefuncsdat:
-    for i in range(nPoint):
-        text = f'{gitter[i]} ' 
-        for ii in range(len(eigVal)):
-            text += f'{eigVec[i][ii]} '
-        text += f'\n'
+with open('wavefuncs.dat', "w", encoding="utf-8") as wavefuncsdat:
+    for n in range(n_point):
+        text = f'{gitter[n]} '
+        for ii in range(len(eig_val)):
+            text += f'{eig_vec[n][ii]} '
+        text += '\n'
         wavefuncsdat.write(text)
 
 
 
 def expval():
+    """ 
+    Calculates the expected values for the eigen problem as well as the uncertainties. 
+
+    :param :
+
+    :return: Arrays with uncertainties and expected values.
+    """
     expvalue = []
-    expvalQuad = []
-    for i in range(len(eigVal)):
-        expvalue.append( delta * np.sum( eigVec[i, :] * gitter[i] * eigVec[i, :] ) )
-        #expvalue.append( ( expvalue[i] ** 2) )
-        expvalQuad.append( delta * np.sum( eigVec[i, :] * gitter[i] ** 2 * eigVec[i, :] ) )
+    expval_quad = []
+    for k in range(len(eig_val)):
+        expvalue.append( delta * np.sum( eig_vec[k, :] * gitter[k] * eig_vec[k, :] ) )
+        expval_quad.append( delta * np.sum( eig_vec[k, :] * gitter[k] ** 2 * eig_vec[k, :] ) )
     expvalue = np.array(expvalue)
-    expvalQuad = np.array(expvalQuad)
-    uncertainty = ( np.sqrt( ( expvalQuad - expvalue ** 2 ) ) )
-    return uncertainty, expvalue, expvalQuad
+    expval_quad = np.array(expval_quad)
+    uncertainty = ( np.sqrt( ( expval_quad - expvalue ** 2 ) ) )
+    return uncertainty, expvalue
 
-uncertainty, expvalue, expvalQuad = expval()
+uncert, exp_value = expval()
 
-with open('expvalues.dat', "w") as expvaldat:
-    for i in range(len(expvalue)):
-        text = f'{expvalue[i]} {uncertainty[i]}\n'
+with open('expvalues.dat', "w", encoding="utf-8") as expvaldat:
+    for i in range(len(exp_value)):
+        text = f'{exp_value[i]} {uncert[i]}\n'
         expvaldat.write(text)
-
