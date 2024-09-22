@@ -5,21 +5,15 @@ import matplotlib.pyplot as plt
 directory = "./"
 
 
-
-
-
-
 raw_potential_data = []
 try:
     potential_file = open(directory + "potential.dat", "r")
-        
 except FileNotFoundError:
-    print("Could not open {}".format(directory + "potential.dat")) 
-
+    print("Could not open {}".format(directory + "potential.dat"))
 else:
     for line in potential_file:
         line = line.split("\n")[0]
-        raw_potential_data.append(line)   
+        raw_potential_data.append(line)
     potential_file.close()
 
 potential = []
@@ -35,12 +29,12 @@ try:
     energies_file = open(directory + "energies.dat", "r")
 
 except FileNotFoundError:
-    print("Could not open {}".format(directory + "energies.dat")) 
+    print("Could not open {}".format(directory + "energies.dat"))
 
 else:
     for line in energies_file:
         line = line.split("\n")[0]
-        energies.append(float(line))   
+        energies.append(float(line))
     energies_file.close()
 
 
@@ -50,12 +44,12 @@ try:
     wavefuncs_file = open(directory + "wavefuncs.dat", "r")
         
 except FileNotFoundError:
-    print("Could not open {}".format(directory + "wavefuncs.dat")) 
+    print("Could not open {}".format(directory + "wavefuncs.dat"))
 
 else:
     for line in wavefuncs_file:
         line = line.split("\n")[0]
-        raw_wavefunc_data.append(line)   
+        raw_wavefunc_data.append(line)
     wavefuncs_file.close()
 
 x = []
@@ -71,7 +65,7 @@ for i in range(len(raw_wavefunc_data)):
 
 
 
-plt.plot(x, potential, c='black') 
+plt.plot(x, potential, c='black')
 plt.hlines(energies, 1.1*min(x), 1.1*max(x), colors='grey', linestyle='-')
 for i in range(len(wavefuncs)):
     plt.plot(x, wavefuncs[i]+energies[i], c='red')
