@@ -1,0 +1,18 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "WiPro"
+version = "0.1"
+requires-python = ">= 3.12"
+dependencies = ["matplotlib", "numpy", "scipy"]
+maintainers = [{name = "Jasmin Reinhardt", email = "ja_re@uni-bremen.de"},
+               {name = "Johannes Fricke", email = "jofricke@uni-bremen.de"}]
+description = "Solver and plotter for 1-d time independant schroedinger equations with defined problems."
+readme = "README.md"
+license = {file = "COPYING"}
+
+[project.scripts]
+schrodinger_solve = "schrodinger.schrodinger_solve:main"
+schrodinger_plot = "schrodinger.schrodinger_plot:main"
