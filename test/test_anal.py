@@ -7,11 +7,11 @@ def energy(lvl, res, mass):
 def test_infinite():
     raw_data = solve.import_input("test/infinitePot")
     data_dict = solve.save_variables(raw_data)
-    solve.abkurzung(data_dict)
+    solve.abbrev(data_dict)
     solve.interpolation(data_dict)
     solve.schrodinger_eq(data_dict)
     solve.expval(data_dict)
-    res = np.abs(data_dict['gitter'][0]-data_dict['gitter'][-1])
+    res = np.abs(data_dict['lat'][0]-data_dict['lat'][-1])
     nrg_theo = np.zeros(len(data_dict['eigval']))
     
 

@@ -2,6 +2,7 @@
 This module plots the data that is received when using schrodinger_solve.
 """
 import argparse
+import os
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -15,10 +16,10 @@ def load_files(directory):
     :return: Dictionary to save all variables to.
     """
 
-    potential_data = np.loadtxt(directory + '/potential.dat')
-    energies = np.loadtxt(directory + '/energies.dat')
-    wavefuncs_data = np.loadtxt(directory + '/wavefuncs.dat')
-    expvalues_data = np.loadtxt(directory + '/expvalues.dat')
+    potential_data = np.loadtxt(os.path.join(directory, 'potential.dat'))
+    energies = np.loadtxt(os.path.join(directory, 'energies.dat'))
+    wavefuncs_data = np.loadtxt(os.path.join(directory, 'wavefuncs.dat'))
+    expvalues_data = np.loadtxt(os.path.join(directory, 'expvalues.dat'))
 
     data_dict = {
         'potential': potential_data[:, 1],
@@ -83,7 +84,7 @@ def plot_results(data_dict, args):
 
 
     if args.export:
-        plt.savefig(args.directory + '/schrodinger_results.pdf', dpi=300)
+        plt.savefig(os.path.join(args.directory, 'schrodinger_results.pdf'), dpi=300)
     if args.show:
         plt.show()
 

@@ -2,6 +2,7 @@
 Solves the time-independent 1-d Schrödinger equation for given potentials.
 """
 import argparse
+import os
 import numpy as np
 import scipy as sp
 
@@ -16,11 +17,7 @@ def import_input(directory):
     :return: List with fit parameters.
     """
     raw_input_data = []
-    try:
-        input_file = open(directory + "/schrodinger.inp", "r", encoding="utf-8")
-
-    except FileNotFoundError as exc:
-        raise ValueError("schrodinger.inp could not be found in this directory.") from exc
+    input_file = open(os.path.join(directory, "schrodinger.inp"), "r", encoding="utf-8")
 
     for line in input_file:
         line = line.split("#")[0]
@@ -73,7 +70,7 @@ def save_variables(raw_input_data):
     return data_dict
 
 
-def abkurzung(data_dict):
+def abbrev(data_dict):
     """
     Calculates the lattice points, the distance between neighbouring points.
 
@@ -90,7 +87,7 @@ def abkurzung(data_dict):
     abk = 1 / ( mass * deriv ** 2 )
 
     data_dict['a']=abk
-    data_dict['gitter']=lattice
+    data_dict['lat']=lattice
     data_dict['delta']=deriv
 
     return data_dict
@@ -106,26 +103,26 @@ def interpolation(data_dict):
     """
 
     interp_type = data_dict['int_type']
-    gitter = data_dict['gitter']
+    lat = data_dict['lat']
     xpot = data_dict['xpot']
     ypot = data_dict['ypot']
     deg = data_dict['deg']
 
     if interp_type == 'linear':
-        potential = np.interp(gitter, xpot, ypot)
+        potential = np.interp(lat, xpot, ypot)
 
     elif interp_type == 'polynomial':
         poly_fit = np.polyfit(xpot, ypot, deg)
-        potential = np.polyval(poly_fit, gitter)
+        potential = np.polyval(poly_fit, lat)
 
     elif interp_type == 'cspline':
         c_spline = sp.interpolate.CubicSpline(xpot, ypot, bc_type = 'natural')
-        potential = c_spline(gitter)
+        potential = c_spline(lat)
 
     else:
         raise ValueError(f'The used interpolation type is not supported by this program. Supported types are: linear, polynomial, cspline. Momentaner type ist: {interp_type}!')
 
-    data_dict['potenzial'] = potential
+    data_dict['pot'] = potential
     return data_dict
 
 
@@ -140,14 +137,14 @@ def schrodinger_eq(data_dict):
     """
     n_point = data_dict['n_point']
     a = data_dict['a']
-    potenzial = data_dict['potenzial']
+    pot = data_dict['pot']
     first_ev = data_dict['first_ev']
     last_ev = data_dict['last_ev']
     delta = data_dict['delta']
 
-    neben_diagonale = [- 1 / 2 * a] * ( n_point - 1 )
-    haupt_diagonale = a + potenzial
-    eigval, eigvec = sp.linalg.eigh_tridiagonal(haupt_diagonale, neben_diagonale, select = 'i', select_range = (first_ev, last_ev))
+    off_diagonal = [- 1 / 2 * a] * ( n_point - 1 )
+    main_diagonal = a + pot
+    eigval, eigvec = sp.linalg.eigh_tridiagonal(main_diagonal, off_diagonal, select = 'i', select_range = (first_ev, last_ev))
     for h in range(len(eigval)):
         eigvec[:, h] /= np.sqrt( delta * np.sum( np.abs( eigvec[:, h] ) ** 2 ) )
 
@@ -166,14 +163,14 @@ def expval(data_dict):
     """
     eigval = data_dict['eigval']
     eigvec = data_dict['eigvec']
-    gitter = data_dict['gitter']
+    lat = data_dict['lat']
     delta = data_dict['delta']
 
     expvalue = []
     expval_quad = []
     for k in range(len(eigval)):
-        expvalue.append( delta * np.sum( eigvec[k, :] * gitter[k] * eigvec[k, :] ) )
-        expval_quad.append( delta * np.sum( eigvec[k, :] * gitter[k] ** 2 * eigvec[k, :] ) )
+        expvalue.append( delta * np.sum( eigvec[k, :] * lat[k] * eigvec[k, :] ) )
+        expval_quad.append( delta * np.sum( eigvec[k, :] * lat[k] ** 2 * eigvec[k, :] ) )
     expvalue = np.array(expvalue)
     expval_quad = np.array(expval_quad)
     uncertainty = ( np.sqrt( ( expval_quad - expvalue ** 2 ) ) )
@@ -191,8 +188,8 @@ def save_data(data_dict):
     
     """
 
-    potenzial = data_dict['potenzial']
-    gitter = data_dict['gitter']
+    pot = data_dict['pot']
+    lat = data_dict['lat']
     n_point = data_dict['n_point']
     eigval = data_dict['eigval']
     eigvec = data_dict['eigvec']
@@ -201,7 +198,7 @@ def save_data(data_dict):
 
     with open('potential.dat', "w", encoding="utf-8") as potentialdat:
         for f in range(n_point):
-            text = f'{gitter[f]}' f' {potenzial[f]} \n'
+            text = f'{lat[f]}' f' {pot[f]} \n'
             potentialdat.write(text)
 
     with open('energies.dat', "w", encoding="utf-8") as energiesdat:
@@ -211,7 +208,7 @@ def save_data(data_dict):
 
     with open('wavefuncs.dat', "w", encoding="utf-8") as wavefuncsdat:
         for n in range(n_point):
-            text = f'{gitter[n]} '
+            text = f'{lat[n]} '
             for ii in range(len(eigval)):
                 text += f'{eigvec[n][ii]} '
             text += '\n'
@@ -237,7 +234,7 @@ def main():
 
     raw_data = import_input(args.directory)
     data_dict = save_variables(raw_data)
-    abkurzung(data_dict)
+    abbrev(data_dict)
     interpolation(data_dict)
     schrodinger_eq(data_dict)
     expval(data_dict)
