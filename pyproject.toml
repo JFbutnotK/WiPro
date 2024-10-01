@@ -11,7 +11,7 @@ maintainers = [{name = "Jasmin Reinhardt", email = "ja_re@uni-bremen.de"},
                {name = "Johannes Fricke", email = "jofricke@uni-bremen.de"}]
 description = "Solver and plotter for 1-d time independant schroedinger equations with defined problems."
 readme = "README.md"
-license = {file = "LICENSE"}
+license = {file = "LICENSE.txt"}
 
 [project.scripts]
 schrodinger_solve = "schrodinger.schrodinger_solve:main"
