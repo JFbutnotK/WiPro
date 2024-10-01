@@ -24,7 +24,7 @@ def import_input(directory):
 
     for line in input_file:
         line = line.split("#")[0]
-        line = line.split("\n")[0]
+        line = ' '.join(line.split())
         raw_input_data.append(line)
     input_file.close()
 
@@ -40,7 +40,7 @@ def save_variables(raw_input_data):
     :return: Variables in Dictionary
     """
     m = float(raw_input_data[0])
-    line2 = raw_input_data[1].split(" ")
+    line2 = raw_input_data[1].split()
     xmin = float(line2[0])
     xmax = float(line2[1])
     npoint = int(line2[2])
@@ -119,7 +119,7 @@ def interpolation(data_dict):
         potential = np.polyval(poly_fit, gitter)
 
     elif interp_type == 'cspline':
-        c_spline = sp.interpolate.CubicSpline(xpot, ypot)
+        c_spline = sp.interpolate.CubicSpline(xpot, ypot, bc_type = 'natural')
         potential = c_spline(gitter)
 
     else:

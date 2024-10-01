@@ -68,9 +68,9 @@ def plot_results(data_dict, args):
         plt.xlim(1.1*min(x), 1.1*max(x))
     else:
         plt.xlim(args.xlimits)
-    
+
     if args.ylimits is None:
-        plt.ylim(min(potential), 1.1*max(energies))
+        plt.ylim(min(potential), max(energies)+abs(max(energies)))
     else:
         plt.ylim(args.ylimits)
 
@@ -106,9 +106,9 @@ def main():
     message = 'float: Factor to scale wavefunctions.  (default: 1)'
     parser.add_argument('-f', '--factor', default=1, help=message, type=float)
     message = 'Limits of the x-axis of the wavefunction plot. None or tuple(float, float) of shape (x_min, x_max). (default: None)'
-    parser.add_argument('-x', '--xlimits', default=None, help=message)
+    parser.add_argument('-x', '--xlimits', default=None, help=message, nargs='+')
     message = 'Limits of the shared y-axis. None or tuple(float, float) of shape (y_min, y_max). (default: None)'
-    parser.add_argument('-y', '--ylimits', default=None, help=message)
+    parser.add_argument('-y', '--ylimits', default=None, help=message, nargs='+')
     args = parser.parse_args()
 
     data_dict = load_files(args.directory)

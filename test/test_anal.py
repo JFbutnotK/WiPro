@@ -2,7 +2,7 @@ import numpy as np
 import schrodinger.schrodinger_solve as solve
 
 def energy(lvl, res, mass):
-    return (lvl + 1) ** 2 * np.pi * 2 / mass / res ** 2 / 2.0
+    return (lvl + 1) ** 2 * np.pi ** 2 / mass / res ** 2 / 2.0
 
 def test_infinite():
     raw_data = solve.import_input("test/infinitePot")
@@ -19,4 +19,4 @@ def test_infinite():
         nrg_theo[lvl] = energy(lvl, res, data_dict['m'])
         
 
-    assert np.allclose(data_dict['eigval'], nrg_theo, rtol=1)
+    assert np.allclose(data_dict['eigval'], nrg_theo, rtol=1e-2)
