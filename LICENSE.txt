@@ -1,0 +1,11 @@
+Free Use License Agreement
+--------------------------
+
+This project may be used by any person for educational and recreational purposes as long as no laws are broken by the user.
+
+This agreement ends if the user violates this term. 
+In that case the user must stop using and destroy all copies of the project.
+
+The licensor is not responsible or liable for any damages or issues arising from the use of this project.
+
+By using the project, the user agrees to these terms.
